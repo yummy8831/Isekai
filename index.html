@@ -1,1226 +1,306 @@
-```html
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Isekai Reincarnation: Chronicles of the Overlord</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Kanit & Prompt) -->
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <title>Isekai Reincarnation Text-Based Simulation</title>
     <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --border-color: #334155;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+        }
         body {
-            font-family: 'Kanit', sans-serif;
-            background-color: #0b0f19;
-            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
         }
-        .font-prompt {
-            font-family: 'Prompt', sans-serif;
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
+        h1, h2, h3 {
+            color: var(--accent-color);
+            text-align: center;
         }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
+        .screen {
+            display: none;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
+        .screen.active {
+            display: block;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6366f1;
+        .btn {
+            background-color: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px 0;
+            transition: background 0.2s;
         }
-        
-        /* Animations & Glows */
-        .glow-purple {
-            box-shadow: 0 0 20px rgba(147, 51, 234, 0.25);
+        .btn:hover {
+            background-color: var(--accent-hover);
         }
-        .glow-amber {
-            box-shadow: 0 0 20px rgba(217, 119, 6, 0.25);
+        .race-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 20px 0;
         }
-        .text-glow {
-            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+        .race-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        
-        /* Custom UI Glassmorphism */
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.6);
+        .race-card:hover, .race-card.selected {
+            border-color: var(--accent-color);
+            background: rgba(56, 189, 248, 0.1);
         }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            border: 1px solid rgba(71, 85, 105, 0.4);
+        .log-box {
+            background: #090d16;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
         }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col justify-between bg-slate-950 text-slate-100 select-none">
+<body>
 
-    <!-- TOP HEADER / NAV -->
-    <header class="h-16 bg-slate-900/90 border-b border-slate-800 px-4 flex justify-between items-center z-20 shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-600 via-indigo-600 to-blue-700 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-indigo-500/30">
-                <i class="fa-solid fa-khanda"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-base sm:text-lg leading-tight bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-300 bg-clip-text text-transparent font-prompt">
-                    ISEKAI REINCARNATION
-                </h1>
-                <p class="text-[11px] text-slate-400">ตำนานการเกิดใหม่และพิชิตต่างโลก</p>
-            </div>
-        </div>
+<div class="container">
+    <h1>Isekai Reincarnation Sim</h1>
 
-        <!-- Top Controls / Quick Info -->
-        <div class="flex items-center gap-2 sm:gap-3">
-            <button onclick="manualSave()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition flex items-center gap-1.5 active:scale-95">
-                <i class="fa-solid fa-floppy-disk text-purple-400"></i> <span class="hidden sm:inline">บันทึก</span>
-            </button>
-            <button onclick="confirmReset()" class="px-3 py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 text-xs font-medium border border-rose-800/50 transition flex items-center gap-1.5 active:scale-95">
-                <i class="fa-solid fa-arrows-rotate"></i> <span class="hidden sm:inline">เกิดใหม่</span>
-            </button>
-        </div>
-    </header>
-
-    <!-- SCREEN 1: REINCARNATION / RACE CREATION -->
-    <div id="screen-creation" class="flex-1 overflow-y-auto p-4 md:p-8 flex items-center justify-center bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black z-10">
-        <div class="max-w-4xl w-full glass-panel rounded-2xl p-5 md:p-8 shadow-2xl glow-purple relative overflow-hidden my-auto">
-            
-            <div class="text-center mb-6">
-                <span class="px-3 py-1 text-xs font-bold rounded-full bg-purple-950/80 text-purple-300 border border-purple-800/60 uppercase tracking-widest">
-                    การคัดสรรของโชคชะตา
-                </span>
-                <h2 class="text-2xl sm:text-3xl font-bold mt-2 text-white font-prompt">จุติสู่โลกใหม่แฟนตาซี</h2>
-                <p class="text-slate-400 text-xs sm:text-sm mt-1">ตั้งชื่อตัวละครของคุณ แล้วเลือกเผ่าพันธุ์เพื่อจุติใหม่</p>
-            </div>
-
-            <!-- Name Input -->
-            <div class="mb-6 max-w-md mx-auto">
-                <label class="block text-xs font-semibold text-slate-400 mb-1.5">ชื่อของคุณในต่างโลก</label>
-                <div class="relative">
-                    <input type="text" id="creation-name" value="ริมุรุ" maxlength="20" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-100 font-medium focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition">
-                    <button onclick="randomName()" class="absolute right-2 top-1/2 -translate-y-1/2 px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-lg transition">
-                        <i class="fa-solid fa-dice"></i> สุ่มชื่อ
-                    </button>
-                </div>
-            </div>
-
-            <!-- Race Grid (5 Races) -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6" id="race-selection-grid">
-                <!-- Injected via JS -->
-            </div>
-
-            <!-- Selected Race Info Box -->
-            <div id="race-detail-card" class="glass-card rounded-xl p-4 mb-6 border border-purple-500/30">
-                <!-- Injected via JS -->
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-3">
-                <button onclick="randomizeRaceSelection()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700 transition flex items-center justify-center gap-2 active:scale-98">
-                    <i class="fa-solid fa-shuffle text-amber-400"></i> สุ่มเผ่าพันธุ์
-                </button>
-                <button onclick="confirmReincarnation()" class="flex-1 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-purple-600/30 transition flex items-center justify-center gap-2 active:scale-98">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> จุติเริ่มต้นชีวิตใหม่
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- SCREEN 2: MAIN DASHBOARD (GAMEPLAY) -->
-    <div id="screen-dashboard" class="flex-1 hidden flex-col lg:flex-row overflow-hidden min-h-0">
+    <!-- หน้าเลือกเผ่าพันธุ์ -->
+    <div id="screen-setup" class="screen active">
+        <h2>เลือกเผ่าพันธุ์ที่คุณต้องการเกิดใหม่</h2>
+        <p style="text-align: center; color: #94a3b8;">คลิกเลือกเผ่าที่ต้องการแล้วกดปุ่มด้านล่าง</p>
         
-        <!-- LEFT PANEL: CHARACTER STATS & RESOURCES -->
-        <aside class="w-full lg:w-80 xl:w-96 bg-slate-900/90 border-r border-slate-800 p-4 flex flex-col gap-3 overflow-y-auto shrink-0">
-            
-            <!-- Character Profile Header -->
-            <div class="glass-card rounded-2xl p-4 relative overflow-hidden border border-slate-700/60">
-                <div class="flex items-center gap-3">
-                    <div id="char-icon-box" class="w-14 h-14 rounded-2xl bg-slate-950 border border-slate-700 flex items-center justify-center text-2xl shadow-inner shrink-0">
-                        <!-- Icon -->
-                    </div>
-                    <div class="overflow-hidden flex-1">
-                        <div class="flex items-center justify-between gap-1">
-                            <h3 id="char-name" class="font-bold text-base text-white truncate font-prompt">--</h3>
-                            <span id="char-stage-badge" class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-900/80 text-purple-200 border border-purple-700/50 shrink-0">
-                                ขั้น 1
-                            </span>
-                        </div>
-                        <p id="char-title" class="text-xs text-purple-400 font-medium truncate">--</p>
-                        <p id="char-race" class="text-[11px] text-slate-400">เผ่า: --</p>
-                    </div>
-                </div>
-
-                <!-- Level & XP Bar -->
-                <div class="mt-3">
-                    <div class="flex justify-between text-xs mb-1">
-                        <span class="text-slate-400">เลเวล <span id="char-level" class="text-purple-400 font-bold">1</span></span>
-                        <span id="char-xp-text" class="text-slate-400 text-[11px]">0 / 100 XP</span>
-                    </div>
-                    <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
-                        <div id="char-xp-bar" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-full w-0 transition-all duration-300"></div>
-                    </div>
-                </div>
-
-                <!-- Combat Power -->
-                <div class="mt-3 pt-2.5 border-t border-slate-800 flex justify-between items-center text-xs">
-                    <span class="text-slate-400">พลังต่อสู้รวม (Power)</span>
-                    <span id="char-power" class="font-bold text-amber-400 text-sm tracking-wide">0</span>
-                </div>
+        <div class="race-grid">
+            <div class="race-card" onclick="selectRace('demon', this)">
+                <h3>1. เผ่ามาร (Demon)</h3>
+                <p>พลังโจมตีสูง เติบโตไว แต่ผู้คนหวาดกลัว</p>
             </div>
-
-            <!-- Stats (STR, INT, AGI, LCK) & Base Combat Stats -->
-            <div class="glass-card rounded-xl p-3 border border-slate-800">
-                <div class="flex justify-between items-center mb-2">
-                    <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-chart-simple text-purple-400"></i> ค่าสแตทตัวละคร
-                    </h4>
-                    <span id="stat-points-badge" class="hidden text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/40 font-bold animate-pulse">
-                        แต้มคงเหลือ: <span id="stat-pts-val">0</span>
-                    </span>
-                </div>
-
-                <!-- Core 4 Stats -->
-                <div class="grid grid-cols-2 gap-2 text-xs mb-3">
-                    <div class="bg-slate-950 p-2 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <div>
-                            <span class="text-slate-400 text-[10px] block">STR (กายภาพ)</span>
-                            <span id="stat-str" class="font-bold text-rose-400 text-sm">0</span>
-                        </div>
-                        <button onclick="addStatPoint('str')" class="btn-add-stat hidden w-5 h-5 bg-purple-600 hover:bg-purple-500 rounded text-white font-bold items-center justify-center text-xs">+</button>
-                    </div>
-                    <div class="bg-slate-950 p-2 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <div>
-                            <span class="text-slate-400 text-[10px] block">INT (เวทมนตร์)</span>
-                            <span id="stat-int" class="font-bold text-cyan-400 text-sm">0</span>
-                        </div>
-                        <button onclick="addStatPoint('int')" class="btn-add-stat hidden w-5 h-5 bg-purple-600 hover:bg-purple-500 rounded text-white font-bold items-center justify-center text-xs">+</button>
-                    </div>
-                    <div class="bg-slate-950 p-2 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <div>
-                            <span class="text-slate-400 text-[10px] block">AGI (ความคล่อง)</span>
-                            <span id="stat-agi" class="font-bold text-emerald-400 text-sm">0</span>
-                        </div>
-                        <button onclick="addStatPoint('agi')" class="btn-add-stat hidden w-5 h-5 bg-purple-600 hover:bg-purple-500 rounded text-white font-bold items-center justify-center text-xs">+</button>
-                    </div>
-                    <div class="bg-slate-950 p-2 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <div>
-                            <span class="text-slate-400 text-[10px] block">LCK (โชคลาภ)</span>
-                            <span id="stat-lck" class="font-bold text-amber-400 text-sm">0</span>
-                        </div>
-                        <button onclick="addStatPoint('lck')" class="btn-add-stat hidden w-5 h-5 bg-purple-600 hover:bg-purple-500 rounded text-white font-bold items-center justify-center text-xs">+</button>
-                    </div>
-                </div>
-
-                <!-- Sub Combat Stats -->
-                <div class="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-slate-800/80">
-                    <div class="flex justify-between"><span class="text-slate-400">HP:</span> <span id="stat-hp" class="text-emerald-400 font-bold">0/0</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">MP:</span> <span id="stat-mp" class="text-blue-400 font-bold">0/0</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">ATK:</span> <span id="stat-atk" class="text-red-400 font-bold">0</span></div>
-                    <div class="flex justify-between"><span class="text-slate-400">DEF:</span> <span id="stat-def" class="text-amber-400 font-bold">0</span></div>
-                </div>
+            <div class="race-card" onclick="selectRace('elf', this)">
+                <h3>2. เผ่าเอลฟ์ (Elf)</h3>
+                <p>ฉลาด ปลดปล่อยเวทมนตร์รุนแรง และมีความผูกพันกับธรรมชาติ</p>
             </div>
-
-            <!-- Traits & Passive Skills -->
-            <div class="glass-card rounded-xl p-3 border border-slate-800">
-                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                    <i class="fa-solid fa-bolt text-amber-400"></i> สกิลและพรสวรรค์ติดตัว
-                </h4>
-                <div id="traits-container" class="flex flex-wrap gap-1">
-                    <!-- Injected via JS -->
-                </div>
+            <div class="race-card" onclick="selectRace('beast', this)">
+                <h3>3. เผ่าครึ่งสัตว์ป่า (Beastkin)</h3>
+                <p>ความเร็วสูง พละกำลังเยี่ยม สัญชาตญาณนักล่า</p>
             </div>
-
-            <!-- Kingdom Resources Bar -->
-            <div class="glass-card rounded-xl p-3 border border-slate-800 mt-auto">
-                <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <i class="fa-solid fa-boxes-stacked text-indigo-400"></i> คลังทรัพยากรเมือง
-                </h4>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="bg-slate-950/70 p-2 rounded-lg border border-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-tree text-emerald-500 text-sm"></i>
-                        <div>
-                            <span class="text-[10px] text-slate-400 block">ไม้ (Wood)</span>
-                            <span id="res-wood" class="font-bold text-slate-200">0</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-950/70 p-2 rounded-lg border border-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-cubes text-slate-400 text-sm"></i>
-                        <div>
-                            <span class="text-[10px] text-slate-400 block">หิน (Stone)</span>
-                            <span id="res-stone" class="font-bold text-slate-200">0</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-950/70 p-2 rounded-lg border border-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-wheat-awn text-amber-500 text-sm"></i>
-                        <div>
-                            <span class="text-[10px] text-slate-400 block">อาหาร (Food)</span>
-                            <span id="res-food" class="font-bold text-slate-200">0</span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-950/70 p-2 rounded-lg border border-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-coins text-yellow-400 text-sm"></i>
-                        <div>
-                            <span class="text-[10px] text-slate-400 block">ทอง (Gold)</span>
-                            <span id="res-gold" class="font-bold text-slate-200">0</span>
-                        </div>
-                    </div>
-                </div>
-                <!-- Population & Army -->
-                <div class="grid grid-cols-2 gap-2 text-xs mt-2 pt-2 border-t border-slate-800">
-                    <div class="text-[11px]"><span class="text-slate-400">ประชากร:</span> <span id="res-pop" class="font-bold text-cyan-300">0 / 0</span></div>
-                    <div class="text-[11px]"><span class="text-slate-400">กองทหาร:</span> <span id="res-army" class="font-bold text-rose-300">0 นาย</span></div>
-                </div>
+            <div class="race-card" onclick="selectRace('dwarf', this)">
+                <h3>4. เผ่าคนแคระ (Dwarf)</h3>
+                <p>เชี่ยวชาญการสร้างอาวุธ สร้างเมือง และความอึดถึกทน</p>
             </div>
-        </aside>
-
-        <!-- RIGHT PANEL: ACTION TABS & EVENTS -->
-        <main class="flex-1 flex flex-col min-w-0 bg-slate-950/50">
-            
-            <!-- TABS HEADER -->
-            <div class="bg-slate-900/80 border-b border-slate-800 px-4 pt-3 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
-                <button onclick="switchTab('train')" id="tab-btn-train" class="tab-btn active px-3.5 py-2.5 rounded-t-xl text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 transition whitespace-nowrap">
-                    <i class="fa-solid fa-dumbbell text-purple-400"></i> ฝึกฝน & สำรวจ
-                </button>
-                <button onclick="switchTab('evolve')" id="tab-btn-evolve" class="tab-btn px-3.5 py-2.5 rounded-t-xl text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap">
-                    <i class="fa-solid fa-dna text-indigo-400"></i> วิวัฒนาการ
-                </button>
-                <button onclick="switchTab('city')" id="tab-btn-city" class="tab-btn px-3.5 py-2.5 rounded-t-xl text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap">
-                    <i class="fa-solid fa-city text-emerald-400"></i> บริหารเมือง
-                </button>
-                <button onclick="switchTab('conquest')" id="tab-btn-conquest" class="tab-btn px-3.5 py-2.5 rounded-t-xl text-xs sm:text-sm font-semibold flex items-center gap-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition whitespace-nowrap">
-                    <i class="fa-solid fa-crown text-amber-400"></i> พิชิตเผ่าพันธุ์
-                </button>
-            </div>
-
-            <!-- TAB CONTENTS AREA -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4">
-                
-                <!-- TAB 1: TRAIN & EXPLORE -->
-                <div id="tab-content-train" class="tab-content space-y-4">
-                    <!-- Training Section -->
-                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
-                        <h3 class="font-bold text-base text-white mb-1 flex items-center gap-2 font-prompt">
-                            <i class="fa-solid fa-dumbbell text-purple-400"></i> ฝึกฝนเพิ่มศักยภาพ
-                        </h3>
-                        <p class="text-xs text-slate-400 mb-3">ฝึกฝนร่างกายและจิตวิญญาณเพื่อเพิ่มสแตทและ EXP โดยไม่ต้องเสี่ยงอันตราย</p>
-                        
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                            <button onclick="trainAction('str')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-left transition group">
-                                <span class="text-xs font-bold text-rose-400 block group-hover:text-rose-300">ฝึกกล้ามเนื้อ</span>
-                                <span class="text-[10px] text-slate-400 block mt-0.5">+EXP, มีโอกาส +STR</span>
-                            </button>
-                            <button onclick="trainAction('int')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-left transition group">
-                                <span class="text-xs font-bold text-cyan-400 block group-hover:text-cyan-300">ทบทวนคาถา</span>
-                                <span class="text-[10px] text-slate-400 block mt-0.5">+EXP, มีโอกาส +INT</span>
-                            </button>
-                            <button onclick="trainAction('agi')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-left transition group">
-                                <span class="text-xs font-bold text-emerald-400 block group-hover:text-emerald-300">ฝึกความไว</span>
-                                <span class="text-[10px] text-slate-400 block mt-0.5">+EXP, มีโอกาส +AGI</span>
-                            </button>
-                            <button onclick="trainAction('meditate')" class="p-3 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-xl text-left transition group">
-                                <span class="text-xs font-bold text-amber-400 block group-hover:text-amber-300">นั่งสมาธิฟื้นฟู</span>
-                                <span class="text-[10px] text-slate-400 block mt-0.5">ฟื้นฟู HP / MP เต็ม</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Dungeon Exploration -->
-                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
-                        <h3 class="font-bold text-base text-white mb-1 flex items-center gap-2 font-prompt">
-                            <i class="fa-solid fa-compass text-indigo-400"></i> ออกสำรวจ & ล่ามอนสเตอร์
-                        </h3>
-                        <p class="text-xs text-slate-400 mb-3">เข้าสู่พื้นที่อันตรายเพื่อสู้รบ สะสมทรัพยากร ทอง และเกณฑ์ประชากร</p>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <button onclick="exploreDungeon('easy')" class="p-3.5 bg-slate-900 hover:bg-slate-800/80 border border-emerald-900/50 hover:border-emerald-600/60 rounded-xl text-left transition group">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-bold text-sm text-emerald-400">ป่ารอบนอก</span>
-                                    <span class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800">ง่าย</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400">เหมาะสำหรับมือใหม่ ได้รับไม้ อาหาร และ XP เบื้องต้น</p>
-                            </button>
-                            <button onclick="exploreDungeon('medium')" class="p-3.5 bg-slate-900 hover:bg-slate-800/80 border border-amber-900/50 hover:border-amber-600/60 rounded-xl text-left transition group">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-bold text-sm text-amber-400">ถ้ำโบราณ</span>
-                                    <span class="text-[10px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800">ปานกลาง</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400">ศัตรูแข็งแกร่งขึ้น ได้รับหิน ทอง และมีโอกาสเจอประชากรหลงทาง</p>
-                            </button>
-                            <button onclick="exploreDungeon('hard')" class="p-3.5 bg-slate-900 hover:bg-slate-800/80 border border-rose-900/50 hover:border-rose-600/60 rounded-xl text-left transition group">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="font-bold text-sm text-rose-400">หุบเขาอสูร</span>
-                                    <span class="text-[10px] bg-rose-950 text-rose-300 px-2 py-0.5 rounded border border-rose-800">ยาก</span>
-                                </div>
-                                <p class="text-[11px] text-slate-400">อันตรายสูงมาก ได้รับ EXP ทองมหาศาล และแร่หายาก</p>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 2: EVOLUTION -->
-                <div id="tab-content-evolve" class="tab-content hidden space-y-4">
-                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
-                        <h3 class="font-bold text-base text-white mb-1 flex items-center gap-2 font-prompt">
-                            <i class="fa-solid fa-dna text-purple-400"></i> สายการวิวัฒนาการ (Class Evolution)
-                        </h3>
-                        <p class="text-xs text-slate-400 mb-4">เมื่อเลเวลถึงกำหนด สายเลือดเผ่าพันธุ์จะตื่นขึ้น ยกระดับร่างสู่ขั้นที่แข็งแกร่งขึ้น</p>
-
-                        <div id="evolution-tree-container" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <!-- Injected via JS -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 3: CITY BUILDING -->
-                <div id="tab-content-city" class="tab-content hidden space-y-4">
-                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
-                        <div class="flex justify-between items-center mb-3">
-                            <div>
-                                <h3 class="font-bold text-base text-white flex items-center gap-2 font-prompt">
-                                    <i class="fa-solid fa-city text-emerald-400"></i> บริหารและสิ่งก่อสร้าง
-                                </h3>
-                                <p class="text-xs text-slate-400">สร้างอาคาร ผลิตทรัพยากร และฝึกกองกำลังทหาร</p>
-                            </div>
-                            <button onclick="collectCityResources()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/30 transition flex items-center gap-1.5 active:scale-95">
-                                <i class="fa-solid fa-wheat-awn-circle-exclamation"></i> เก็บผลผลิตประจำวัน
-                            </button>
-                        </div>
-
-                        <!-- Buildings List -->
-                        <div id="buildings-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                            <!-- Injected via JS -->
-                        </div>
-
-                        <!-- Recruit Army Box -->
-                        <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-3">
-                            <div>
-                                <h4 class="font-bold text-sm text-white flex items-center gap-2">
-                                    <i class="fa-solid fa-shield-halberd text-rose-400"></i> เกณฑ์กองทหาร (Recruit Army)
-                                </h4>
-                                <p class="text-xs text-slate-400">เปลี่ยนประชากรเป็นทหาร (ใช้ 1 ประชากร + 20 ทอง + 10 อาหาร)</p>
-                            </div>
-                            <button onclick="recruitSoldier()" class="w-full sm:w-auto px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition shrink-0 active:scale-95">
-                                <i class="fa-solid fa-user-plus"></i> เกณฑ์ทหาร +1
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 4: CONQUEST -->
-                <div id="tab-content-conquest" class="tab-content hidden space-y-4">
-                    <div class="glass-card rounded-2xl p-4 border border-slate-800">
-                        <h3 class="font-bold text-base text-white mb-1 flex items-center gap-2 font-prompt">
-                            <i class="fa-solid fa-crown text-amber-400"></i> การพิชิตและยึดครองดินแดน
-                        </h3>
-                        <p class="text-xs text-slate-400 mb-4">ส่งกองทัพเข้าทำสงครามกับเผ่าพันธุ์อื่น เพื่อยึดครองและบังคับส่งบรรณาการ (Tribute)</p>
-
-                        <div id="conquest-list-container" class="space-y-3">
-                            <!-- Injected via JS -->
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- BOTTOM EVENT LOG -->
-            <div class="h-44 bg-slate-900/90 border-t border-slate-800 p-3 flex flex-col shrink-0">
-                <div class="flex justify-between items-center mb-1.5 pb-1 border-b border-slate-800/80">
-                    <span class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-scroll text-purple-400"></i> บันทึกเหตุการณ์ (Event Log)
-                    </span>
-                    <button onclick="clearLogs()" class="text-[10px] text-slate-500 hover:text-slate-300 transition">
-                        ล้างบันทึก
-                    </button>
-                </div>
-                <div id="event-log" class="flex-1 overflow-y-auto space-y-1 text-xs font-mono pr-1">
-                    <!-- Dynamic logs injected here -->
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <!-- MODAL POPUP -->
-    <div id="modal-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div id="modal-box" class="glass-panel border border-purple-500/50 rounded-2xl max-w-md w-full p-6 shadow-2xl relative glow-purple">
-            <h3 id="modal-title" class="text-lg font-bold text-white mb-2 font-prompt">--</h3>
-            <div id="modal-body" class="text-xs sm:text-sm text-slate-300 mb-5 leading-relaxed">
-                <!-- Content -->
-            </div>
-            <div id="modal-actions" class="flex justify-end gap-2">
-                <button onclick="closeModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
-                    ตกลง
-                </button>
+            <div class="race-card" onclick="selectRace('human', this)">
+                <h3>5. เผ่ามนุษย์ (Human)</h3>
+                <p>ปรับตัวเก่ง มีศักยภาพไร้ขีดจำกัดและเติบโตได้หลากหลาย</p>
             </div>
         </div>
+
+        <button class="btn" onclick="startReincarnation()">เกิดใหม่ในต่างโลก!</button>
     </div>
 
-    <!-- SCRIPT LOGIC -->
-    <script>
-        // ==========================================
-        // GAME DATA DEFINITIONS
-        // ==========================================
+    <!-- หน้าหลักของเกม -->
+    <div id="screen-game" class="screen">
+        <h3 id="player-title">สถานะตัวละคร</h3>
+        
+        <div class="stats-panel">
+            <div>เผ่า: <span id="stat-race">-</span></div>
+            <div>เลเวล: <span id="stat-level">1</span></div>
+            <div>พลังชีวิต (HP): <span id="stat-hp">100</span>/<span id="stat-maxhp">100</span></div>
+            <div>พลังงาน (MP): <span id="stat-mp">50</span>/<span id="stat-maxmp">50</span></div>
+            <div>EXP: <span id="stat-exp">0</span>/<span id="stat-nextexp">100</span></div>
+            <div>ทองคำ: <span id="stat-gold">0</span> G</div>
+            <div>กำลังรบเมือง: <span id="stat-army">0</span></div>
+            <div>ดินแดนยึดครอง: <span id="stat-territory">หมู่บ้านเริ่มต้น</span></div>
+        </div>
 
-        const RACES_DATA = {
-            slime: {
-                id: 'slime',
-                name: 'สไลม์ (Slime)',
-                icon: 'fa-droplet',
-                color: 'text-cyan-400',
-                desc: 'ร่างเมือกยืดหยุ่น ย่อยสลายและดูดซับพลังได้ดีเยี่ยม เพิ่มค่าสแตทและ EXP ได้รวดเร็วที่สุด',
-                baseStats: { str: 5, int: 8, agi: 6, lck: 10, maxHp: 120, maxMp: 80 },
-                traits: ['กลืนกินและเลียนแบบ (+20% EXP)', 'ร่างกายเมือก (ลดความเสียหายกายภาพ 15%)'],
-                evolutions: [
-                    { stage: 1, reqLevel: 10, name: 'สไลม์พิษ (Poison Slime)', desc: 'หลั่งพิษกรด เพิ่ม INT +15, ATK +20', bonus: { int: 15, str: 5, maxHp: 80 } },
-                    { stage: 2, reqLevel: 25, name: 'สไลม์ชั้นสูง (Demon Slime)', desc: 'สไลม์ระดับจอมมาร เพิ่มสแตททุกค่าอย่างมหาศาล', bonus: { str: 25, int: 35, agi: 20, maxHp: 250, maxMp: 200 } },
-                    { stage: 3, reqLevel: 50, name: 'จักรพรรดิสไลม์อนันต์ (Chaos Sovereign Slime)', desc: 'ร่างจุติระดับพระเจ้า กลืนกินได้ทุกสรรพสิ่ง', bonus: { str: 80, int: 100, agi: 60, lck: 50, maxHp: 800, maxMp: 600 } }
-                ]
-            },
-            goblin: {
-                id: 'goblin',
-                name: 'ก็อบลิน (Goblin)',
-                icon: 'fa-skull',
-                color: 'text-emerald-400',
-                desc: 'เผ่าพันธุ์ขนาดเล็กแต่ขยายฝูงและประชากรได้อย่างรวดเร็ว มีโบนัสการสร้างเมืองและทหาร',
-                baseStats: { str: 8, int: 4, agi: 10, lck: 6, maxHp: 90, maxMp: 40 },
-                traits: ['ขยายพันธุ์รวดเร็ว (+ประชากร)', 'ยุทธวิธีหมาหมู่ (ยิ่งทหารเยอะ ยิ่งโจมตีแรง)'],
-                evolutions: [
-                    { stage: 1, reqLevel: 10, name: 'ฮ็อบก็อบลิน (Hobgoblin)', desc: 'ร่างใหญ่กำยำ เพิ่ม STR +20, DEF +15', bonus: { str: 20, agi: 10, maxHp: 120 } },
-                    { stage: 2, reqLevel: 25, name: 'ก็อบลินลอร์ด (Goblin Lord)', desc: 'ผู้นำฝูงสืบสายเลือดโบราณ เพิ่มบารมีและพลังต่อสู้', bonus: { str: 40, int: 20, agi: 25, maxHp: 300 } },
-                    { stage: 3, reqLevel: 50, name: 'ราชาเสนาก็อบลิน (Goblin Overlord King)', desc: 'ราชาผู้ปกครองกองทัพก็อบลินนับล้าน', bonus: { str: 110, int: 50, agi: 70, lck: 40, maxHp: 900 } }
-                ]
-            },
-            elf: {
-                id: 'elf',
-                name: 'เอลฟ์ (Elf)',
-                icon: 'fa-wand-magic-sparkles',
-                color: 'text-teal-300',
-                desc: 'เชี่ยวชาญเวทมนตร์และธาตุธรรมชาติ สติปัญญาสูง ผลิตไม้และอาหารได้มีประสิทธิภาพ',
-                baseStats: { str: 4, int: 14, agi: 9, lck: 7, maxHp: 80, maxMp: 160 },
-                traits: ['สัมผัสแห่งพฤกษา (+ผลิตไม้/อาหาร)', 'เนตรเวทมนตร์ (ความแรงเวทตาม INT)'],
-                evolutions: [
-                    { stage: 1, reqLevel: 10, name: 'ไฮเอลฟ์ (High Elf)', desc: 'สายเลือดบริสุทธิ์ เพิ่ม INT +25, MP +150', bonus: { int: 25, agi: 10, maxMp: 150 } },
-                    { stage: 2, reqLevel: 25, name: 'จอมเวทพฤกษาโบราณ (Elder Archmage Elf)', desc: 'สื่อสารกับภูตธรรมชาติ พลังเวททำลายล้าง', bonus: { int: 55, agi: 20, maxMp: 400, maxHp: 180 } },
-                    { stage: 3, reqLevel: 50, name: 'ราชินี/จักรพรรดิพฤกษาเทวะ (World-Tree Monarch)', desc: 'ผู้ปกครองพฤกษาแห่งจักรวาล พลังเวทไร้ขีดจำกัด', bonus: { int: 130, agi: 50, lck: 60, maxMp: 1000, maxHp: 650 } }
-                ]
-            },
-            beastkin: {
-                id: 'beastkin',
-                name: 'มนุษย์สัตว์ (Beastkin)',
-                icon: 'fa-paw',
-                color: 'text-amber-400',
-                desc: 'นักรบสัญชาตญาณสัตว์ป่า พลังกายภาพและความเร็วสูง สู้รบระยะประชิดได้ดีที่สุด',
-                baseStats: { str: 12, int: 3, agi: 12, lck: 5, maxHp: 130, maxMp: 40 },
-                traits: ['สัญชาตญาณสัตว์ป่า (+อัตราคริติคอล)', 'กรงเล็บเหล็กกล้า (สร้างความเสียหายกายภาพรุนแรง)'],
-                evolutions: [
-                    { stage: 1, reqLevel: 10, name: 'พยัคฆ์คลั่ง (Beast Berserker)', desc: 'ปลดปลดสัญชาตญาณดิบ เพิ่ม STR +22, AGI +15', bonus: { str: 22, agi: 15, maxHp: 140 } },
-                    { stage: 2, reqLevel: 25, name: 'ขุนพลราชาสิงห์ (Warbeast Chieftain)', desc: 'ผู้นำฝูงชนเผ่าสัตว์ป่า เพิ่มพลังป้องกันและโจมตี', bonus: { str: 50, agi: 35, maxHp: 350 } },
-                    { stage: 3, reqLevel: 50, name: 'เทพอสูรบรรพกาล (Mythic Beast Overlord)', desc: 'กายเนื้อเทวะ ยากที่จะหาผู้ต้านทาน', bonus: { str: 120, agi: 80, lck: 40, maxHp: 1000 } }
-                ]
-            },
-            undead: {
-                id: 'undead',
-                name: 'อันเดด / โครงกระดูก (Undead)',
-                icon: 'fa-bone',
-                color: 'text-purple-300',
-                desc: 'สิ่งมีชีวิตอมตะ ไม่รู้เหน็ดเหนื่อย ทนทานสูง พัฒนาสายเวทมืดและการคืนชีพได้',
-                baseStats: { str: 7, int: 10, agi: 5, lck: 3, maxHp: 150, maxMp: 100 },
-                traits: ['ร่างกายไร้ชีวิต (ฟื้นฟูอัตโนมัติ)', 'ศาสตร์เวทมืด (คาถาสูบ HP ศัตรู)'],
-                evolutions: [
-                    { stage: 1, reqLevel: 10, name: 'อัศวินโครงกระดูก (Skeleton Knight)', desc: 'สวมเกราะเหล็กกล้า เพิ่ม STR +15, DEF +25', bonus: { str: 15, int: 15, maxHp: 180 } },
-                    { stage: 2, reqLevel: 25, name: 'ลิช / จอมเวทไร้พ่าย (Arch Lich)', desc: 'ผู้เชี่ยวชาญคาถาความตายและความมืด', bonus: { int: 60, str: 20, maxMp: 450, maxHp: 250 } },
-                    { stage: 3, reqLevel: 50, name: 'ราชันย์อมตะ Overlord (Immortal Overlord)', desc: 'จอมมารผู้ปกครองความตายและเหล่าอันเดดทั้งมวล', bonus: { int: 110, str: 90, agi: 40, maxHp: 900, maxMp: 800 } }
-                ]
-            }
+        <div class="log-box" id="game-log">
+            [ระบบ]: ยินดีต้อนรับสู่โลกแฟนตาซี คุณได้เกิดใหม่เรียบร้อยแล้ว...<br>
+        </div>
+
+        <div class="actions-grid">
+            <button class="btn" onclick="actionTrain()">ฝึกฝนตนเอง (+EXP)</button>
+            <button class="btn" onclick="actionHunt()">ออกล่า/สู้รบ</button>
+            <button class="btn" onclick="actionBuildCity()">พัฒนาเมือง/กองทัพ</button>
+            <button class="btn" onclick="actionConquer()">สงครามยึดครองเผ่าอื่น</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedRaceKey = null;
+    let player = {
+        race: '',
+        level: 1,
+        hp: 100,
+        maxHp: 100,
+        mp: 50,
+        maxMp: 50,
+        exp: 0,
+        nextExp: 100,
+        gold: 0,
+        army: 10,
+        territory: 'หมู่บ้านเริ่มต้น'
+    };
+
+    function selectRace(raceKey, element) {
+        document.querySelectorAll('.race-card').forEach(c => c.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedRaceKey = raceKey;
+    }
+
+    function startReincarnation() {
+        if (!selectedRaceKey) {
+            alert('กรุณาเลือกเผ่าพันธุ์ก่อนเกิดใหม่!');
+            return;
+        }
+
+        const raceNames = {
+            'demon': 'เผ่ามาร',
+            'elf': 'เผ่าเอลฟ์',
+            'beast': 'เผ่าครึ่งสัตว์ป่า',
+            'dwarf': 'เผ่าคนแคระ',
+            'human': 'เผ่ามนุษย์'
         };
 
-        const BUILDINGS_DATA = [
-            { id: 'house', name: 'บ้านพักประชากร', icon: 'fa-house-chimney', cost: { wood: 30, stone: 10, gold: 10 }, popBonus: 5, desc: 'ขยายที่อยู่อาศัย เพิ่มขีดจำกัดประชากร +5 คน' },
-            { id: 'lumber', name: 'โรงตัดไม้', icon: 'fa-tree', cost: { wood: 20, gold: 15 }, prod: { wood: 15 }, desc: 'แปรรูปไม้ เพิ่มผลผลิตไม้ +15 ต่อวัน' },
-            { id: 'quarry', name: 'เหมืองหิน', icon: 'fa-pickaxe', cost: { wood: 40, stone: 10, gold: 20 }, prod: { stone: 12 }, desc: 'ขุดเจาะหิน เพิ่มผลผลิตหิน +12 ต่อวัน' },
-            { id: 'farm', name: 'ฟาร์มเกษตรกรรม', icon: 'fa-wheat-awn', cost: { wood: 25, stone: 5, gold: 15 }, prod: { food: 20 }, desc: 'ปลูกพืชพรรณ เพิ่มผลผลิตอาหาร +20 ต่อวัน' },
-            { id: 'barracks', name: 'ค่ายฝึกทหาร', icon: 'fa-shield-halberd', cost: { wood: 80, stone: 60, gold: 100 }, armyBonus: 10, desc: 'สถานที่ฝึกซ้อมกองทัพ เพิ่มพลังป้องกันเมือง' }
-        ];
+        player.race = raceNames[selectedRaceKey];
+        
+        // ปรับสแตทเริ่มต้นตามเผ่า
+        if(selectedRaceKey === 'demon') { player.maxHp = 120; player.maxMp = 60; }
+        else if(selectedRaceKey === 'elf') { player.maxHp = 90; player.maxMp = 100; }
+        else if(selectedRaceKey === 'beast') { player.maxHp = 110; player.maxMp = 40; }
+        else if(selectedRaceKey === 'dwarf') { player.maxHp = 150; player.maxMp = 30; }
+        else { player.maxHp = 100; player.maxMp = 50; }
 
-        const OTHER_KINGDOMS = [
-            { id: 'k_slime', race: 'slime', name: 'อาณาจักรวารีเมือก Slime Nation', power: 250, status: 'Neutral', tribute: { gold: 20, food: 20 }, desc: 'ดินแดนแห่งหนองน้ำลึกลับ ทหารมีความยืดหยุ่นสูง' },
-            { id: 'k_goblin', race: 'goblin', name: 'จักรวรรดิก็อบลินเขี้ยวเขียว', power: 550, status: 'Neutral', tribute: { wood: 30, gold: 15 }, desc: 'ค่ายป้อมปราการก็อบลิน มีกองกำลังจำนวนมาก' },
-            { id: 'k_beastkin', race: 'beastkin', name: 'สหพันธรัฐมนุษย์สัตว์พยัคฆ์', power: 1200, status: 'Neutral', tribute: { food: 40, gold: 30 }, desc: 'ทุ่งหญ้าของเหล่านักรบสัตว์ป่า ดุดันและทรงพลัง' },
-            { id: 'k_elf', race: 'elf', name: 'นครป่าศักดิ์สิทธิ์เอลฟ์', power: 2500, status: 'Neutral', tribute: { wood: 50, stone: 30, gold: 50 }, desc: 'นครเวทมนตร์ป่าลึก ป้องปราการเวทแน่นหนา' },
-            { id: 'k_undead', race: 'undead', name: 'มหานครสุสานความตาย Undead', power: 5000, status: 'Neutral', tribute: { stone: 60, gold: 80 }, desc: 'ปราสาทราตรีแห่งความตาย กองทัพอมตะไร้พ่าย' }
-        ];
+        player.hp = player.maxHp;
+        player.mp = player.maxMp;
 
-        const RANDOM_NAMES = ['ริมุรุ', 'ไอนซ์', 'ลูเชียส', 'เซโร่', 'อาเธอร์', 'วอลเดอร์', 'คาเอล', 'ดาร์กเนส', 'เซเลส'];
+        // สลับหน้าจอ
+        document.getElementById('screen-setup').classList.remove('active');
+        document.getElementById('screen-game').classList.add('active');
 
-        // ==========================================
-        // GAME STATE
-        // ==========================================
+        updateStatsUI();
+        logMessage(`คุณได้เกิดใหม่เป็น "${player.race}" สำเร็จ! เริ่มต้นสร้างตำนานของคุณได้เลย`);
+    }
 
-        let gameState = {
-            player: {
-                name: 'ริมุรุ',
-                raceId: 'slime',
-                stage: 0,
-                level: 1,
-                xp: 0,
-                xpToNext: 100,
-                statPoints: 0,
-                stats: { str: 5, int: 8, agi: 6, lck: 10, hp: 120, maxHp: 120, mp: 80, maxMp: 80 },
-                traits: []
-            },
-            resources: {
-                wood: 50,
-                stone: 30,
-                food: 50,
-                gold: 50,
-                pop: 2,
-                maxPop: 10,
-                army: 0
-            },
-            buildings: { house: 1, lumber: 1, quarry: 0, farm: 1, barracks: 0 },
-            kingdoms: JSON.parse(JSON.stringify(OTHER_KINGDOMS))
-        };
+    function updateStatsUI() {
+        document.getElementById('stat-race').innerText = player.race;
+        document.getElementById('stat-level').innerText = player.level;
+        document.getElementById('stat-hp').innerText = player.hp;
+        document.getElementById('stat-maxhp').innerText = player.maxHp;
+        document.getElementById('stat-mp').innerText = player.mp;
+        document.getElementById('stat-maxmp').innerText = player.maxMp;
+        document.getElementById('stat-exp').innerText = player.exp;
+        document.getElementById('stat-nextexp').innerText = player.nextExp;
+        document.getElementById('stat-gold').innerText = player.gold;
+        document.getElementById('stat-army').innerText = player.army;
+        document.getElementById('stat-territory').innerText = player.territory;
+    }
 
-        let selectedRaceId = 'slime';
+    function logMessage(msg) {
+        const logBox = document.getElementById('game-log');
+        logBox.innerHTML += `[บันทึก]: ${msg}<br>`;
+        logBox.scrollTop = logBox.scrollHeight;
+    }
 
-        // ==========================================
-        // INITIALIZATION
-        // ==========================================
+    function actionTrain() {
+        let gainedExp = 35 + Math.floor(Math.random() * 20);
+        player.exp += gainedExp;
+        logMessage(`คุณฝึกฝนอย่างหนัก ได้รับ EXP +${gainedExp}`);
+        checkLevelUp();
+        updateStatsUI();
+    }
 
-        window.onload = function() {
-            if (loadGame()) {
-                // Loaded successfully
-            } else {
-                renderRaceSelectionGrid();
-                updateRaceDetailCard();
-            }
-        };
+    function actionHunt() {
+        let goldGain = 20 + Math.floor(Math.random() * 30);
+        let expGain = 40 + Math.floor(Math.random() * 25);
+        player.gold += goldGain;
+        player.exp += expGain;
+        logMessage(`คุณออกล่ามอนสเตอร์และศัตรู ได้รับทองคำ +${goldGain} G และ EXP +${expGain}`);
+        checkLevelUp();
+        updateStatsUI();
+    }
 
-        function renderRaceSelectionGrid() {
-            const container = document.getElementById('race-selection-grid');
-            container.innerHTML = '';
-
-            Object.keys(RACES_DATA).forEach(rKey => {
-                const race = RACES_DATA[rKey];
-                const isSelected = selectedRaceId === rKey;
-
-                const card = document.createElement('div');
-                card.className = `cursor-pointer p-3 rounded-xl border transition flex flex-col items-center text-center ${
-                    isSelected ? 'bg-purple-950/80 border-purple-500 shadow-lg shadow-purple-500/30 ring-2 ring-purple-500/50' : 'bg-slate-950/60 border-slate-800 hover:border-slate-700'
-                }`;
-                card.onclick = () => {
-                    selectedRaceId = rKey;
-                    renderRaceSelectionGrid();
-                    updateRaceDetailCard();
-                };
-
-                card.innerHTML = `
-                    <div class="w-10 h-10 rounded-full bg-slate-900 border border-slate-700 flex items-center justify-center text-lg ${race.color} mb-1.5">
-                        <i class="fa-solid ${race.icon}"></i>
-                    </div>
-                    <span class="text-xs font-bold text-slate-200">${race.name.split(' ')[0]}</span>
-                `;
-                container.appendChild(card);
-            });
+    function actionBuildCity() {
+        if (player.gold < 50) {
+            logMessage(`ทองคำไม่พอสำหรับการพัฒนาเมือง (ต้องการ 50 G)`);
+            alert('ทองคำไม่พอ! ออกไปล่ามอนสเตอร์เพื่อหาทองก่อน');
+            return;
         }
+        player.gold -= 50;
+        player.army += 15;
+        logMessage(`คุณใช้ทองคำพัฒนาเมืองและเกณฑ์ทหารเพิ่มขึ้น กองทัพเติบโตขึ้น (+15 กำลังรบ)`);
+        updateStatsUI();
+    }
 
-        function updateRaceDetailCard() {
-            const race = RACES_DATA[selectedRaceId];
-            const container = document.getElementById('race-detail-card');
-
-            container.innerHTML = `
-                <div class="flex items-center gap-3 mb-2">
-                    <i class="fa-solid ${race.icon} text-2xl ${race.color}"></i>
-                    <div>
-                        <h4 class="font-bold text-sm text-white">${race.name}</h4>
-                        <p class="text-xs text-slate-400">${race.desc}</p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-4 gap-2 my-2 text-xs">
-                    <div class="bg-slate-950 p-1.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">STR</span><b class="text-rose-400">${race.baseStats.str}</b></div>
-                    <div class="bg-slate-950 p-1.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">INT</span><b class="text-cyan-400">${race.baseStats.int}</b></div>
-                    <div class="bg-slate-950 p-1.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">AGI</span><b class="text-emerald-400">${race.baseStats.agi}</b></div>
-                    <div class="bg-slate-950 p-1.5 rounded border border-slate-800 text-center"><span class="text-slate-400 block text-[10px]">LCK</span><b class="text-amber-400">${race.baseStats.lck}</b></div>
-                </div>
-                <div class="text-xs">
-                    <span class="text-slate-400 font-semibold">พรสวรรค์เผ่าพันธุ์:</span>
-                    <div class="flex flex-wrap gap-1 mt-1">
-                        ${race.traits.map(t => `<span class="px-2 py-0.5 rounded bg-purple-950 text-purple-300 text-[10px] border border-purple-800/50">${t}</span>`).join('')}
-                    </div>
-                </div>
-            `;
+    function actionConquer() {
+        if (player.army < 30) {
+            logMessage(`กำลังรบไม่เพียงพอ (ต้องการอย่างน้อย 30 กำลังรบเพื่อไปยึดครอง)`);
+            alert('กำลังรบยังน้อยเกินไป ไปพัฒนาเมืองและเกณฑ์กองทัพก่อน!');
+            return;
         }
+        player.army += 20;
+        player.gold += 100;
+        player.territory = 'อาณาจักรข้างเคียง (ยึดสำเร็จ)';
+        logMessage(`คุณนำทัพบุกโจมตีและยึดครองดินแดนสำเร็จ! ได้รับทรัพยากรและขยายอาณาเขต`);
+        updateStatsUI();
+    }
 
-        function randomName() {
-            const name = RANDOM_NAMES[Math.floor(Math.random() * RANDOM_NAMES.length)];
-            document.getElementById('creation-name').value = name;
+    function checkLevelUp() {
+        if (player.exp >= player.nextExp) {
+            player.level++;
+            player.exp -= player.nextExp;
+            player.nextExp = Math.floor(player.nextExp * 1.5);
+            player.maxHp += 30;
+            player.maxMp += 20;
+            player.hp = player.maxHp;
+            player.mp = player.maxMp;
+            logMessage(`✨ ยินดีด้วย! คุณเลื่อนขั้นเป็นเลเวล ${player.level} แล้ว สแตทเพิ่มขึ้น!`);
         }
+    }
+</script>
 
-        function randomizeRaceSelection() {
-            const keys = Object.keys(RACES_DATA);
-            selectedRaceId = keys[Math.floor(Math.random() * keys.length)];
-            renderRaceSelectionGrid();
-            updateRaceDetailCard();
-            randomName();
-        }
-
-        function confirmReincarnation() {
-            const nameInput = document.getElementById('creation-name').value.trim();
-            const race = RACES_DATA[selectedRaceId];
-
-            gameState.player.name = nameInput || 'ผู้กล้าไร้นาม';
-            gameState.player.raceId = selectedRaceId;
-            gameState.player.stage = 0;
-            gameState.player.level = 1;
-            gameState.player.xp = 0;
-            gameState.player.xpToNext = 100;
-            gameState.player.statPoints = 0;
-
-            gameState.player.stats = {
-                str: race.baseStats.str,
-                int: race.baseStats.int,
-                agi: race.baseStats.agi,
-                lck: race.baseStats.lck,
-                hp: race.baseStats.maxHp,
-                maxHp: race.baseStats.maxHp,
-                mp: race.baseStats.maxMp,
-                maxMp: race.baseStats.maxMp
-            };
-
-            gameState.player.traits = [...race.traits];
-            gameState.kingdoms = JSON.parse(JSON.stringify(OTHER_KINGDOMS));
-
-            // Hide Screen 1, Show Screen 2
-            document.getElementById('screen-creation').classList.add('hidden');
-            document.getElementById('screen-dashboard').classList.remove('hidden');
-            document.getElementById('screen-dashboard').classList.add('flex');
-
-            addLog(`✨ คุณได้ถือกำเนิดใหม่ในต่างโลกเป็น "${gameState.player.name}" เผ่าพันธุ์ ${race.name}!`, 'levelup');
-            updateUI();
-            saveGame();
-        }
-
-        // ==========================================
-        // UI UPDATER
-        // ==========================================
-
-        function updateUI() {
-            const p = gameState.player;
-            const race = RACES_DATA[p.raceId];
-
-            // Profile
-            document.getElementById('char-name').innerText = p.name;
-            document.getElementById('char-race').innerText = `เผ่า: ${race.name}`;
-            
-            const currentTitle = p.stage === 0 ? 'ร่างแรกเริ่ม' : race.evolutions[p.stage - 1].name;
-            document.getElementById('char-title').innerText = currentTitle;
-            document.getElementById('char-stage-badge').innerText = `ขั้น ${p.stage + 1}`;
-
-            // Icon
-            document.getElementById('char-icon-box').innerHTML = `<i class="fa-solid ${race.icon} ${race.color}"></i>`;
-
-            // Level & XP
-            document.getElementById('char-level').innerText = p.level;
-            document.getElementById('char-xp-text').innerText = `${p.xp} / ${p.xpToNext} XP`;
-            const xpPct = Math.min(100, Math.floor((p.xp / p.xpToNext) * 100));
-            document.getElementById('char-xp-bar').style.width = `${xpPct}%`;
-
-            // Combat Power Index
-            const atk = Math.floor(p.stats.str * 2.5 + p.stats.int * 2);
-            const def = Math.floor(p.stats.str * 1.2 + p.stats.agi * 1.5);
-            const totalPower = Math.floor(
-                atk * 3 + def * 2 + p.stats.maxHp * 0.5 + p.stats.maxMp * 0.3 + (gameState.resources.army * 25)
-            );
-            document.getElementById('char-power').innerText = totalPower.toLocaleString();
-
-            // Stats
-            document.getElementById('stat-str').innerText = p.stats.str;
-            document.getElementById('stat-int').innerText = p.stats.int;
-            document.getElementById('stat-agi').innerText = p.stats.agi;
-            document.getElementById('stat-lck').innerText = p.stats.lck;
-
-            document.getElementById('stat-hp').innerText = `${p.stats.hp}/${p.stats.maxHp}`;
-            document.getElementById('stat-mp').innerText = `${p.stats.mp}/${p.stats.maxMp}`;
-            document.getElementById('stat-atk').innerText = atk;
-            document.getElementById('stat-def').innerText = def;
-
-            // Stat Points
-            const ptsBadge = document.getElementById('stat-points-badge');
-            const addBtns = document.querySelectorAll('.btn-add-stat');
-            if (p.statPoints > 0) {
-                ptsBadge.classList.remove('hidden');
-                document.getElementById('stat-pts-val').innerText = p.statPoints;
-                addBtns.forEach(btn => { btn.classList.remove('hidden'); btn.classList.add('flex'); });
-            } else {
-                ptsBadge.classList.add('hidden');
-                addBtns.forEach(btn => { btn.classList.add('hidden'); btn.classList.remove('flex'); });
-            }
-
-            // Traits
-            document.getElementById('traits-container').innerHTML = p.traits.map(t => 
-                `<span class="px-2 py-0.5 text-[10px] rounded bg-purple-950/80 text-purple-300 border border-purple-800/60"><i class="fa-solid fa-sparkles text-[8px] mr-1"></i>${t}</span>`
-            ).join('');
-
-            // Resources
-            document.getElementById('res-wood').innerText = gameState.resources.wood;
-            document.getElementById('res-stone').innerText = gameState.resources.stone;
-            document.getElementById('res-food').innerText = gameState.resources.food;
-            document.getElementById('res-gold').innerText = gameState.resources.gold;
-            document.getElementById('res-pop').innerText = `${gameState.resources.pop} / ${gameState.resources.maxPop}`;
-            document.getElementById('res-army').innerText = `${gameState.resources.army} นาย`;
-
-            // Render Sub Tab Content
-            renderEvolutionTab();
-            renderCityTab();
-            renderConquestTab();
-        }
-
-        function addStatPoint(statType) {
-            const p = gameState.player;
-            if (p.statPoints <= 0) return;
-
-            p.statPoints -= 1;
-            p.stats[statType] += 1;
-
-            if (statType === 'str') p.stats.maxHp += 15;
-            if (statType === 'int') p.stats.maxMp += 15;
-
-            updateUI();
-        }
-
-        // ==========================================
-        // TAB SWITCHING
-        // ==========================================
-
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active', 'border-purple-500', 'text-purple-400');
-                btn.classList.add('border-transparent', 'text-slate-400');
-            });
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-
-            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
-            activeBtn.classList.add('active', 'border-purple-500', 'text-purple-400');
-            activeBtn.classList.remove('border-transparent', 'text-slate-400');
-
-            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
-        }
-
-        // ==========================================
-        // TRAINING & EXPLORATION
-        // ==========================================
-
-        function trainAction(type) {
-            const p = gameState.player;
-            let xpGained = 15;
-
-            if (type === 'meditate') {
-                p.stats.hp = p.stats.maxHp;
-                p.stats.mp = p.stats.maxMp;
-                addLog('🧘 นั่งสมาธิรวบรวมลมปราณ... ฟื้นฟู HP และ MP เต็ม!', 'success');
-                updateUI();
-                return;
-            }
-
-            // Stat gain chance
-            if (Math.random() < 0.3) {
-                p.stats[type] += 1;
-                addLog(`💪 การฝึกฝนสัมฤทธิผล! ค่าสแตท [${type.toUpperCase()}] เพิ่มขึ้น +1`, 'levelup');
-            } else {
-                addLog(`🏋️ ฝึกฝนร่างกายอย่างหนัก ได้รับ +${xpGained} EXP`, 'info');
-            }
-
-            addXP(xpGained);
-            updateUI();
-        }
-
-        function exploreDungeon(difficulty) {
-            const p = gameState.player;
-            if (p.stats.hp <= 15) {
-                showModal('พลังชีวิตต่ำเกินไป!', 'คุณบาดเจ็บหนัก กรุณาเลือก [นั่งสมาธิฟื้นฟู] ก่อนออกสำรวจ');
-                return;
-            }
-
-            let mult = 1;
-            let enemyName = '';
-
-            if (difficulty === 'easy') {
-                mult = 1;
-                enemyName = ['หมาป่าขนเทา', 'สไลม์ป่าคลั่ง', 'กระต่ายมีเขน'][Math.floor(Math.random() * 3)];
-            } else if (difficulty === 'medium') {
-                mult = 2.2;
-                enemyName = ['กอบลินซุ่มโจมตี', 'แมงมุมพิษยักษ์', 'โกเลมหินบรรพกาล'][Math.floor(Math.random() * 3)];
-            } else if (difficulty === 'hard') {
-                mult = 4.5;
-                enemyName = ['มังกรดินปีกหัก', 'คิเมรากระซิบราตรี', 'อัศวินเกราะดำเฝ้าซากโบราณ'][Math.floor(Math.random() * 3)];
-            }
-
-            // Damage Calculation
-            const enemyAtk = Math.floor(15 * mult);
-            const myDef = Math.floor(p.stats.str * 1.2 + p.stats.agi * 1.5);
-            const dmgTaken = Math.max(3, Math.floor(enemyAtk - (myDef * 0.3)));
-
-            p.stats.hp = Math.max(0, p.stats.hp - dmgTaken);
-
-            // Rewards
-            const xpGained = Math.floor(25 * mult * (p.raceId === 'slime' ? 1.2 : 1.0));
-            const woodGained = Math.floor(Math.random() * 10 * mult) + 2;
-            const stoneGained = Math.floor(Math.random() * 8 * mult) + 1;
-            const foodGained = Math.floor(Math.random() * 12 * mult) + 3;
-            const goldGained = Math.floor(Math.random() * 15 * mult) + 5;
-
-            gameState.resources.wood += woodGained;
-            gameState.resources.stone += stoneGained;
-            gameState.resources.food += foodGained;
-            gameState.resources.gold += goldGained;
-
-            addLog(`⚔️ ปะทะกับ [${enemyName}]! รับความเสียหาย -${dmgTaken} HP | ได้รับ +${xpGained} XP, ไม้ +${woodGained}, อาหาร +${foodGained}, ทอง +${goldGained}`, 'battle');
-
-            // Chance to gain pop
-            if (Math.random() < 0.3 && gameState.resources.pop < gameState.resources.maxPop) {
-                gameState.resources.pop += 1;
-                addLog('🤝 ช่วยเหลือผู้รอดชีวิตในดันเจี้ยน ได้รับประชากรเพิ่ม +1 คน!', 'success');
-            }
-
-            addXP(xpGained);
-            updateUI();
-        }
-
-        function addXP(amount) {
-            const p = gameState.player;
-            p.xp += amount;
-
-            while (p.xp >= p.xpToNext) {
-                p.xp -= p.xpToNext;
-                p.level += 1;
-                p.xpToNext = Math.floor(p.xpToNext * 1.35);
-                p.statPoints += 3;
-
-                // Stat growth
-                p.stats.maxHp += 20;
-                p.stats.hp = p.stats.maxHp;
-                p.stats.maxMp += 15;
-                p.stats.mp = p.stats.maxMp;
-
-                addLog(`🎉 เลเวลอัป! บรรลุเลเวล ${p.level} (ได้รับแต้มอัปสแตท +3 แต้ม)`, 'levelup');
-            }
-        }
-
-        // ==========================================
-        // EVOLUTION SYSTEM
-        // ==========================================
-
-        function renderEvolutionTab() {
-            const p = gameState.player;
-            const race = RACES_DATA[p.raceId];
-            const container = document.getElementById('evolution-tree-container');
-            container.innerHTML = '';
-
-            race.evolutions.forEach((evo, idx) => {
-                const isUnlocked = p.stage > idx;
-                const canEvolve = p.stage === idx && p.level >= evo.reqLevel;
-
-                const card = document.createElement('div');
-                card.className = `p-4 rounded-xl border flex flex-col justify-between ${
-                    isUnlocked ? 'bg-slate-900/40 border-slate-800 opacity-60' :
-                    canEvolve ? 'glass-panel border-purple-500 glow-purple' : 'bg-slate-950/80 border-slate-800/80'
-                }`;
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded ${isUnlocked ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-purple-900/60 text-purple-300'}">
-                                ${isUnlocked ? 'วิวัฒนาการแล้ว' : `ต้องการ Lv.${evo.reqLevel}`}
-                            </span>
-                            <span class="text-xs text-slate-500 font-bold">ขั้นที่ ${idx + 2}</span>
-                        </div>
-                        <h4 class="font-bold text-sm text-white mb-1 font-prompt">${evo.name}</h4>
-                        <p class="text-xs text-slate-400 mb-3">${evo.desc}</p>
-                    </div>
-                    <button onclick="evolveRace(${idx})" ${!canEvolve ? 'disabled' : ''} className="w-full py-2 px-3 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 ${
-                        canEvolve ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md' : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                    }">
-                        <i class="fa-solid fa-dna"></i> ${isUnlocked ? 'สำร็จแล้ว' : canEvolve ? 'วิวัฒนาการทันที!' : `เลเวลไม่ถึง (${p.level}/${evo.reqLevel})`}
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function evolveRace(evoIndex) {
-            const p = gameState.player;
-            const race = RACES_DATA[p.raceId];
-            const evo = race.evolutions[evoIndex];
-
-            p.stage = evoIndex + 1;
-            
-            if (evo.bonus.str) p.stats.str += evo.bonus.str;
-            if (evo.bonus.int) p.stats.int += evo.bonus.int;
-            if (evo.bonus.agi) p.stats.agi += evo.bonus.agi;
-            if (evo.bonus.lck) p.stats.lck += evo.bonus.lck;
-            if (evo.bonus.maxHp) { p.stats.maxHp += evo.bonus.maxHp; p.stats.hp = p.stats.maxHp; }
-            if (evo.bonus.maxMp) { p.stats.maxMp += evo.bonus.maxMp; p.stats.mp = p.stats.maxMp; }
-
-            showModal('🧬 วิวัฒนาการสายพันธุ์สำเร็จ!', `คุณได้ก้าวข้ามขีดจำกัดและวิวัฒนาการกลายเป็น <b>[${evo.name}]</b>! ได้รับพลังเพิ่มขึ้นมหาศาล`);
-            addLog(`🌟 วิวัฒนาการสำเร็จ! จุติสู่ร่าง [${evo.name}]`, 'levelup');
-
-            updateUI();
-            saveGame();
-        }
-
-        // ==========================================
-        // CITY MANAGEMENT
-        // ==========================================
-
-        function renderCityTab() {
-            const container = document.getElementById('buildings-grid');
-            container.innerHTML = '';
-
-            BUILDINGS_DATA.forEach(b => {
-                const count = gameState.buildings[b.id] || 0;
-                
-                const cWood = Math.floor((b.cost.wood || 0) * Math.pow(1.3, count));
-                const cStone = Math.floor((b.cost.stone || 0) * Math.pow(1.3, count));
-                const cGold = Math.floor((b.cost.gold || 0) * Math.pow(1.3, count));
-
-                const canAfford = gameState.resources.wood >= cWood &&
-                                  gameState.resources.stone >= cStone &&
-                                  gameState.resources.gold >= cGold;
-
-                const card = document.createElement('div');
-                card.className = 'bg-slate-950/80 border border-slate-800 rounded-xl p-3 flex justify-between items-center';
-
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 flex items-center justify-center text-base text-emerald-400 shrink-0">
-                            <i class="fa-solid ${b.icon}"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="font-bold text-xs text-white">${b.name}</h4>
-                                <span class="px-1.5 py-0.2 rounded bg-slate-800 text-[10px] text-slate-300 font-bold">Lv.${count}</span>
-                            </div>
-                            <p class="text-[11px] text-slate-400">${b.desc}</p>
-                            <div class="flex gap-2 text-[10px] mt-1">
-                                ${cWood ? `<span class="${gameState.resources.wood >= cWood ? 'text-emerald-400' : 'text-rose-400'}">ไม้ ${cWood}</span>` : ''}
-                                ${cStone ? `<span class="${gameState.resources.stone >= cStone ? 'text-slate-300' : 'text-rose-400'}">หิน ${cStone}</span>` : ''}
-                                ${cGold ? `<span class="${gameState.resources.gold >= cGold ? 'text-amber-400' : 'text-rose-400'}">ทอง ${cGold}</span>` : ''}
-                            </div>
-                        </div>
-                    </div>
-                    <button onclick="buildBuilding('${b.id}', ${cWood}, ${cStone}, ${cGold})" ${!canAfford ? 'disabled' : ''} className="px-3 py-1.5 rounded-lg text-xs font-bold transition shrink-0 ${
-                        canAfford ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                    }">
-                        สร้าง/อัป
-                    </button>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function buildBuilding(id, cWood, cStone, cGold) {
-            if (gameState.resources.wood < cWood || gameState.resources.stone < cStone || gameState.resources.gold < cGold) return;
-
-            gameState.resources.wood -= cWood;
-            gameState.resources.stone -= cStone;
-            gameState.resources.gold -= cGold;
-
-            gameState.buildings[id] = (gameState.buildings[id] || 0) + 1;
-
-            if (id === 'house') gameState.resources.maxPop += 5;
-
-            const bData = BUILDINGS_DATA.find(b => b.id === id);
-            addLog(`🏗️ สร้าง/อัปเกรด [${bData.name}] เป็นระดับ ${gameState.buildings[id]} สำเร็จ!`, 'success');
-
-            updateUI();
-            saveGame();
-        }
-
-        function collectCityResources() {
-            const wProd = (gameState.buildings.lumber || 0) * 15;
-            const sProd = (gameState.buildings.quarry || 0) * 12;
-            const fProd = (gameState.buildings.farm || 0) * 20;
-
-            gameState.resources.wood += wProd;
-            gameState.resources.stone += sProd;
-            gameState.resources.food += fProd;
-
-            // Tributes from conquered kingdoms
-            let tributeGold = 0;
-            gameState.kingdoms.forEach(k => {
-                if (k.status === 'Conquered') {
-                    tributeGold += k.tribute.gold || 0;
-                }
-            });
-            gameState.resources.gold += tributeGold;
-
-            addLog(`🌾 เก็บเกี่ยวผลผลิตเมือง: ไม้ +${wProd}, หิน +${sProd}, อาหาร +${fProd}${tributeGold > 0 ? `, บรรณาการทอง +${tributeGold}` : ''}`, 'success');
-            updateUI();
-        }
-
-        function recruitSoldier() {
-            if (gameState.resources.pop < 1 || gameState.resources.gold < 20 || gameState.resources.food < 10) {
-                showModal('ไม่สามารถเกณฑ์ทหารได้', 'ต้องการประชากรอย่างน้อย 1 คน, ทอง 20 เหรียญ และอาหาร 10 หน่วย');
-                return;
-            }
-
-            gameState.resources.pop -= 1;
-            gameState.resources.gold -= 20;
-            gameState.resources.food -= 10;
-            gameState.resources.army += 1;
-
-            addLog('⚔️ ฝึกซ้อมและเกณฑ์ทหารใหม่เข้าร่วมกองทัพ +1 นาย!', 'success');
-            updateUI();
-        }
-
-        // ==========================================
-        // CONQUEST SYSTEM
-        // ==========================================
-
-        function renderConquestTab() {
-            const container = document.getElementById('conquest-list-container');
-            container.innerHTML = '';
-
-            gameState.kingdoms.forEach(k => {
-                const raceInfo = RACES_DATA[k.race];
-                
-                let statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-300">เป็นกลาง</span>';
-                if (k.status === 'Conquered') statusBadge = '<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-bold">อยู่ภายใต้อาณัติ</span>';
-
-                const card = document.createElement('div');
-                card.className = 'glass-card rounded-xl p-3.5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border border-slate-800';
-
-                card.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center text-xl ${raceInfo.color} shrink-0">
-                            <i class="fa-solid ${raceInfo.icon}"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-2">
-                                <h4 class="font-bold text-sm text-white font-prompt">${k.name}</h4>
-                                ${statusBadge}
-                            </div>
-                            <p class="text-xs text-slate-400">${k.desc}</p>
-                            <p class="text-xs text-amber-400 font-bold mt-0.5">พลังต่อสู้: ${k.power.toLocaleString()}</p>
-                        </div>
-                    </div>
-                    <div class="w-full sm:w-auto flex justify-end">
-                        ${k.status === 'Neutral' ? `
-                            <button onclick="attackKingdom('${k.id}')" class="w-full sm:w-auto px-4 py-2 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95">
-                                <i class="fa-solid fa-swords"></i> ยกทัพบุกยึดครอง
-                            </button>
-                        ` : `
-                            <span class="text-xs text-emerald-400 font-bold"><i class="fa-solid fa-crown"></i> ส่งบรรณาการ (+${k.tribute.gold} ทอง/วัน)</span>
-                        `}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function attackKingdom(kId) {
-            const k = gameState.kingdoms.find(item => item.id === kId);
-            const playerPower = parseInt(document.getElementById('char-power').innerText.replace(/,/g, ''));
-
-            if (playerPower < k.power) {
-                showModal('พ่ายแพ้สงคราม!', `พลังต่อสู้ของคุณ (${playerPower.toLocaleString()}) ต่ำกว่า [${k.name}] (${k.power.toLocaleString()}) ส่งผลให้กองทัพพ่ายแพ้ยับเยิน! เสียหายหนัก`);
-                gameState.player.stats.hp = 1;
-                gameState.resources.army = Math.floor(gameState.resources.army * 0.5);
-                addLog(`💥 บุกยึด [${k.name}] ล้มเหลว! กองทัพพ่ายแพ้ บาดเจ็บหนัก และสูญเสียทหาร 50%`, 'battle');
-            } else {
-                k.status = 'Conquered';
-                gameState.resources.gold += 300;
-                gameState.resources.pop += 5;
-                showModal('พิชิตอาณาจักรสำเร็จ!', `คุณนำกองทัพบดขยี้ [${k.name}] ได้สำเร็จ! อาณาจักรยอมสยบและกลายเป็นบริวาร ได้รับทรัพย์สิน 300 ทอง และกวาดต้อนประชากร 5 คน`);
-                addLog(`👑 ได้รับชัยชนะเหนือ [${k.name}]! ผูกขาดการยึดครองดินแดนสำเร็จ`, 'levelup');
-            }
-
-            updateUI();
-            saveGame();
-        }
-
-        // ==========================================
-        // LOGS & MODALS & SAVING
-        // ==========================================
-
-        function addLog(msg, type = 'normal') {
-            const logBox = document.getElementById('event-log');
-            const entry = document.createElement('div');
-
-            let colorClass = 'text-slate-300';
-            if (type === 'success') colorClass = 'text-emerald-400';
-            else if (type === 'battle') colorClass = 'text-rose-400';
-            else if (type === 'levelup') colorClass = 'text-amber-300 font-bold';
-            else if (type === 'info') colorClass = 'text-cyan-300';
-
-            const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            entry.className = `${colorClass} leading-tight`;
-            entry.innerHTML = `<span class="text-slate-600 text-[10px]">[${timeStr}]</span> ${msg}`;
-
-            logBox.prepend(entry);
-            if (logBox.children.length > 40) logBox.removeChild(logBox.lastChild);
-        }
-
-        function clearLogs() {
-            document.getElementById('event-log').innerHTML = '';
-        }
-
-        function showModal(title, body) {
-            document.getElementById('modal-title').innerText = title;
-            document.getElementById('modal-body').innerHTML = body;
-            document.getElementById('modal-overlay').classList.remove('hidden');
-        }
-
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-        }
-
-        function manualSave() {
-            saveGame();
-            showModal('บันทึกเรียบร้อย', 'ระบบได้ทำการบันทึกข้อมูลการเล่นล่าสุดของคุณลงในเบราว์เซอร์แล้ว');
-        }
-
-        function saveGame() {
-            try {
-                localStorage.setItem('isekai_rpg_save', JSON.stringify(gameState));
-            } catch (e) {
-                console.error("Save failed", e);
-            }
-        }
-
-        function loadGame() {
-            try {
-                const saved = localStorage.getItem('isekai_rpg_save');
-                if (saved) {
-                    gameState = JSON.parse(saved);
-                    document.getElementById('screen-creation').classList.add('hidden');
-                    document.getElementById('screen-dashboard').classList.remove('hidden');
-                    document.getElementById('screen-dashboard').classList.add('flex');
-                    updateUI();
-                    addLog('📂 โหลดข้อมูลการเล่นล่าสุดเรียบร้อยแล้ว!', 'info');
-                    return true;
-                }
-            } catch (e) {
-                console.error("Load failed", e);
-            }
-            return false;
-        }
-
-        function confirmReset() {
-            if (confirm('คุณต้องการรีเซ็ตเกมเพื่อเกิดใหม่อีกครั้งหรือไม่? (ข้อมูลเดิมจะถูกลบทั้งหมด)')) {
-                localStorage.removeItem('isekai_rpg_save');
-                location.reload();
-            }
-        }
-    </script>
 </body>
 </html>
-```
